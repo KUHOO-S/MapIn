@@ -1,2 +1,2 @@
-# MappIn
+# MapIn
 DevJams 2019 
