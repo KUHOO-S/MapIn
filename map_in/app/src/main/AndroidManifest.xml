@@ -23,13 +23,7 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name="com.jalapeno.ar.core.mapin.java.NavigationActivity"
-            android:label="@string/title_activity_navigation"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name="com.jalapeno.ar.core.mapin.java.mapin.MapInActivity"
-            android:configChanges="orientation|screenSize"
-            android:exported="true"
+            android:name="com.jalapeno.ar.core.mapin.java.SplashActivity"
             android:screenOrientation="locked"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
@@ -37,6 +31,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.jalapeno.ar.core.mapin.java.NavigationActivity"
+            android:label="@string/title_activity_navigation"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.jalapeno.ar.core.mapin.java.mapin.MapInActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="locked"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
         </activity>
         <!--
  This tag indicates that this application requires ARCore.  This results in the Google Play
