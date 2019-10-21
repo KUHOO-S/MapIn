@@ -117,7 +117,6 @@ public final class SnackbarHelper {
                         .getView()
                         .findViewById(android.support.design.R.id.snackbar_text))
                 .setMaxLines(maxLines);
-            messageSnackbar.show();
           }
         });
   }
