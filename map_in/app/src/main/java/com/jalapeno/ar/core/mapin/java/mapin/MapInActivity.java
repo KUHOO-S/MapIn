@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.ar.core.examples.java.mapin;
+package com.jalapeno.ar.core.mapin.java.mapin;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -35,17 +35,18 @@ import com.google.ar.core.PointCloud;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.examples.java.common.helpers.CameraPermissionHelper;
-import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper;
-import com.google.ar.core.examples.java.common.helpers.FullScreenHelper;
-import com.google.ar.core.examples.java.common.helpers.SnackbarHelper;
-import com.google.ar.core.examples.java.common.helpers.TapHelper;
-import com.google.ar.core.examples.java.common.helpers.TrackingStateHelper;
-import com.google.ar.core.examples.java.common.rendering.BackgroundRenderer;
-import com.google.ar.core.examples.java.common.rendering.ObjectRenderer;
-import com.google.ar.core.examples.java.common.rendering.ObjectRenderer.BlendMode;
-import com.google.ar.core.examples.java.common.rendering.PlaneRenderer;
-import com.google.ar.core.examples.java.common.rendering.PointCloudRenderer;
+import com.jalapeno.ar.core.mapin.java.common.helpers.CameraPermissionHelper;
+import com.jalapeno.ar.core.mapin.java.common.helpers.DisplayRotationHelper;
+import com.jalapeno.ar.core.mapin.java.common.helpers.FullScreenHelper;
+import com.jalapeno.ar.core.mapin.java.common.helpers.SnackbarHelper;
+import com.jalapeno.ar.core.mapin.java.common.helpers.TapHelper;
+import com.jalapeno.ar.core.mapin.java.common.helpers.TrackingStateHelper;
+import com.jalapeno.ar.core.mapin.java.common.rendering.BackgroundRenderer;
+import com.jalapeno.ar.core.mapin.java.common.rendering.ObjectRenderer;
+import com.jalapeno.ar.core.mapin.java.common.rendering.ObjectRenderer.BlendMode;
+import com.jalapeno.ar.core.mapin.java.common.rendering.PlaneRenderer;
+import com.jalapeno.ar.core.mapin.java.common.rendering.PointCloudRenderer;
+import com.google.ar.core.examples.java.mapin.R;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.UnavailableApkTooOldException;
 import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;

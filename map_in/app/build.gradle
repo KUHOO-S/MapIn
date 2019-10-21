@@ -13,7 +13,7 @@ def setVersionName = { ->
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.google.ar.core.examples.java.mapin"
+        applicationId "com.jalapeno.ar.core.mapin.java.mapin"
 
         // AR Optional apps must declare minSdkVersion >= 14.
         // AR Required apps must declare minSdkVersion >= 24.
