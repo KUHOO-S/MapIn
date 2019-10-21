@@ -23,6 +23,20 @@
       android:id="@+id/surfaceview"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
-      android:layout_gravity="top"/>
+      android:layout_gravity="top" />
+
+  <EditText
+      android:id="@+id/editText"
+      android:layout_width="360dp"
+      android:layout_height="60dp"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:layout_marginTop="23dp"
+      android:background="@layout/rounded_border_edittext"
+      android:ems="10"
+      android:inputType="textPersonName"
+      android:hint="Search"
+      android:textColor="#343434"
+      android:paddingHorizontal="20dp"/>
 
 </RelativeLayout>
