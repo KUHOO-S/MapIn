@@ -18,8 +18,10 @@ package com.jalapeno.ar.core.mapin.java.mapin;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.Point;
 import com.google.ar.core.Point.OrientationMode;
 import com.google.ar.core.PointCloud;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
@@ -70,6 +73,8 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   private GLSurfaceView surfaceView;
 
   private boolean installRequested;
+  int screenHeight;
+  int screenWidth;
 
   private Session session;
   private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
@@ -83,8 +88,11 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   private final PlaneRenderer planeRenderer = new PlaneRenderer();
   private final PointCloudRenderer pointCloudRenderer = new PointCloudRenderer();
 
+  ColoredAnchor minDistanceAnchor;
   // Temporary matrix allocated here to reduce number of allocations for each frame.
   private final float[] anchorMatrix = new float[16];
+  private float[] anchorPosition = new float[3];
+  float[] currentDrawColor = new float[4];
   private static final float[] DEFAULT_COLOR = new float[] {0f, 0f, 0f, 0f};
 
   private static final String SEARCHING_PLANE_MESSAGE = "Searching for surfaces...";
@@ -92,7 +100,7 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   // Anchors created from taps used for object placing with a given color.
   private static class ColoredAnchor {
     public final Anchor anchor;
-    public final float[] color;
+    public float[] color;
 
     public ColoredAnchor(Anchor a, float[] color4f) {
       this.anchor = a;
@@ -105,6 +113,12 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    DisplayMetrics displayMetrics = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+    screenHeight = displayMetrics.heightPixels;
+    screenWidth = displayMetrics.widthPixels;
+
     setContentView(R.layout.activity_main);
     surfaceView = findViewById(R.id.surfaceview);
     displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
@@ -253,6 +267,52 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
     GLES20.glViewport(0, 0, width, height);
   }
 
+  public float[] calculateWorld2CameraMatrix(float[] modelmtx, float[] viewmtx, float[] prjmtx) {
+
+    float scaleFactor = 1.0f;
+    float[] scaleMatrix = new float[16];
+    float[] modelXscale = new float[16];
+    float[] viewXmodelXscale = new float[16];
+    float[] world2screenMatrix = new float[16];
+
+    Matrix.setIdentityM(scaleMatrix, 0);
+    scaleMatrix[0] = scaleFactor;
+    scaleMatrix[5] = scaleFactor;
+    scaleMatrix[10] = scaleFactor;
+
+    Matrix.multiplyMM(modelXscale, 0, modelmtx, 0, scaleMatrix, 0);
+    Matrix.multiplyMM(viewXmodelXscale, 0, viewmtx, 0, modelXscale, 0);
+    Matrix.multiplyMM(world2screenMatrix, 0, prjmtx, 0, viewXmodelXscale, 0);
+
+    return world2screenMatrix;
+  }
+
+  double[] world2Screen(int screenWidth, int screenHeight, float[] world2cameraMatrix)
+  {
+    float[] origin = {0f, 0f, 0f, 1f};
+    float[] ndcCoord = new float[4];
+    Matrix.multiplyMV(ndcCoord, 0,  world2cameraMatrix, 0,  origin, 0);
+
+    ndcCoord[0] = ndcCoord[0]/ndcCoord[3];
+    ndcCoord[1] = ndcCoord[1]/ndcCoord[3];
+
+    double[] pos_2d = new double[]{0,0};
+    pos_2d[0] = screenWidth  * ((ndcCoord[0] + 1.0)/2.0);
+    pos_2d[1] = screenHeight * (( 1.0 - ndcCoord[1])/2.0);
+
+    return pos_2d;
+  }
+
+
+  float calcDistance(Pose p1, Pose p2) {
+    float dx = p1.tx() - p2.tx();
+    float dy = p1.ty() - p2.ty();
+    float dz = p1.tz() - p2.tz();
+
+    float distance = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+    return distance;
+  }
+
   @Override
   public void onDrawFrame(GL10 gl) {
     // Clear screen to notify driver it should not load any pixels from previous frame.
@@ -276,7 +336,6 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
 
       // Handle one tap per frame.
       handleTap(frame, camera);
-
       // If frame is ready, render camera preview image to the GL surface.
       backgroundRenderer.draw(frame);
 
@@ -325,10 +384,34 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
 
       // Visualize anchors created by touch.
       float scaleFactor = 1.0f;
+      float minDistance = -1;
+
+
+      for (ColoredAnchor coloredAnchor : anchors) {
+        coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
+        anchorPosition =  calculateWorld2CameraMatrix(anchorMatrix, viewmtx, projmtx);
+
+        double[] anchor_2d = world2Screen(screenWidth, screenHeight, anchorPosition);
+        boolean in_screen = (anchor_2d[0] > 0 && anchor_2d[0] < screenWidth) && (anchor_2d[1] > 0 && anchor_2d[1] < screenHeight);
+
+        float dist = calcDistance(coloredAnchor.anchor.getPose(), camera.getPose());
+        if ((minDistance == -1 || dist < minDistance) && in_screen) {
+          minDistance = dist;
+          minDistanceAnchor = coloredAnchor;
+        }
+      }
+
       for (ColoredAnchor coloredAnchor : anchors) {
         if (coloredAnchor.anchor.getTrackingState() != TrackingState.TRACKING) {
           continue;
         }
+
+        if (coloredAnchor == minDistanceAnchor) {
+          coloredAnchor.color = new float[] {229.0f, 57.0f, 53.0f, 255.0f};
+        } else {
+          coloredAnchor.color = new float[] {139.0f, 195.0f, 74.0f, 255.0f};
+        }
+
         // Get the current pose of an Anchor in world space. The Anchor pose is updated
         // during calls to session.update() as ARCore refines its estimate of the world.
         coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
