@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.ar.core.examples.java.helloar;
+package com.google.ar.core.examples.java.mapin;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -62,8 +62,8 @@ import javax.microedition.khronos.opengles.GL10;
  * ARCore API. The application will display any detected planes and will allow the user to tap on a
  * plane to place a 3d model of the Android robot.
  */
-public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
-  private static final String TAG = HelloArActivity.class.getSimpleName();
+public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
+  private static final String TAG = MapInActivity.class.getSimpleName();
 
   // Rendering. The Renderers are created here, and initialized when the GL surface is created.
   private GLSurfaceView surfaceView;
