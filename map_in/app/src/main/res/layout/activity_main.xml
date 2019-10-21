@@ -68,7 +68,7 @@
       <TextView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text=" 30 min"
+          android:text=" 0 min : 0 m"
           android:textColor="#343434"
           android:textSize="20dp"/>
 
