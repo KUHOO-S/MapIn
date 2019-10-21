@@ -19,11 +19,15 @@ package com.jalapeno.ar.core.mapin.java.mapin;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
@@ -76,6 +80,9 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   int screenHeight;
   int screenWidth;
 
+  private RelativeLayout rootLayout;
+  private TextView testText;
+
   private Session session;
   private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
   private DisplayRotationHelper displayRotationHelper;
@@ -114,14 +121,30 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    setContentView(R.layout.activity_main);
+    surfaceView = findViewById(R.id.surfaceview);
+    displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
+
+    // Add text view
+    LayoutParams lparams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    this.rootLayout = (RelativeLayout)this.findViewById(R.id.rootLayout);
+    this.testText = new TextView(this);
+    this.testText.setLayoutParams(lparams);
+    this.testText.setText("Go here");
+    this.testText.setTextSize(30);
+    this.testText.setTextColor(0xffffffff);
+    this.testText.setBackgroundColor(0xbb000000);
+    this.testText.setPadding(20,15,20,15);
+    this.testText.setVisibility(View.INVISIBLE);
+    this.rootLayout.addView(this.testText);
+
+    this.findViewById(R.id.bottomBar).bringToFront();
+
+
     DisplayMetrics displayMetrics = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
     screenHeight = displayMetrics.heightPixels;
     screenWidth = displayMetrics.widthPixels;
-
-    setContentView(R.layout.activity_main);
-    surfaceView = findViewById(R.id.surfaceview);
-    displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
     // Set up tap listener.
     tapHelper = new TapHelper(/*context=*/ this);
@@ -393,12 +416,16 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
 
         double[] anchor_2d = world2Screen(screenWidth, screenHeight, anchorPosition);
         boolean in_screen = (anchor_2d[0] > 0 && anchor_2d[0] < screenWidth) && (anchor_2d[1] > 0 && anchor_2d[1] < screenHeight);
-
         float dist = calcDistance(coloredAnchor.anchor.getPose(), camera.getPose());
+
         if ((minDistance == -1 || dist < minDistance) && in_screen) {
           minDistance = dist;
           minDistanceAnchor = coloredAnchor;
         }
+      }
+
+      if (minDistance == -1) {
+        this.testText.setVisibility(View.INVISIBLE);
       }
 
       for (ColoredAnchor coloredAnchor : anchors) {
@@ -406,15 +433,18 @@ public class MapInActivity extends AppCompatActivity implements GLSurfaceView.Re
           continue;
         }
 
+        coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
         if (coloredAnchor == minDistanceAnchor) {
           coloredAnchor.color = new float[] {229.0f, 57.0f, 53.0f, 255.0f};
+          anchorPosition =  calculateWorld2CameraMatrix(anchorMatrix, viewmtx, projmtx);
+
+          double[] anchor_2d = world2Screen(screenWidth, screenHeight, anchorPosition);
+          this.testText.setX((int)(anchor_2d[0]));
+          this.testText.setY((int)(anchor_2d[1]));
+          this.testText.setVisibility(View.VISIBLE);
         } else {
           coloredAnchor.color = new float[] {139.0f, 195.0f, 74.0f, 255.0f};
         }
-
-        // Get the current pose of an Anchor in world space. The Anchor pose is updated
-        // during calls to session.update() as ARCore refines its estimate of the world.
-        coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
 
         // Update and draw the model and its shadow.
         virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
