@@ -28,10 +28,10 @@
     <EditText
         android:id="@+id/editText"
         android:layout_width="360dp"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:background="@layout/rounded_border_edittext"
         android:ems="10"
         android:drawablePadding="10dp"
@@ -42,11 +42,43 @@
         android:paddingHorizontal="20dp"
         android:textColorHint="#343434" />
 
-  <ConstrainedLayout
+  <LinearLayout
       android:layout_width="fill_parent"
       android:layout_height="120dp"
       android:layout_alignParentBottom="true"
-      android:backgr>
-  </ConstrainedLayout>
+      android:background="#e0f7f7f7"
+      android:orientation="horizontal"
+      >
+    <LinearLayout
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:paddingBottom="0dp"
+        >
+      <TextView
+          android:layout_width="300dp"
+          android:layout_height="wrap_content"
+          android:text="TT Gallery 1"
+          android:textSize="30dp"
+          android:textColor="#343434"
+          />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text=" 30 min"
+          android:textColor="#343434"
+          android:textSize="20dp"/>
+
+    </LinearLayout>
+    <ImageView
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:src="@drawable/cross"
+        />
+  </LinearLayout>
 
 </RelativeLayout>
